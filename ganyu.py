@@ -1,3 +1,4 @@
+# Python Port of Zakharov's Ganyu DPS Calculation https://docs.google.com/spreadsheets/d/1RAz3jx4x1ThWED8XWg8GKIf73RjPrZrnSukYZUCSRU8/edit#gid=1120258150
 from utils import calc_dmg, calc_dmg_obj, avg_crit_dmg, AttrObj, DmgTag
 
 # list of damage applications, tags, 
@@ -29,24 +30,18 @@ print(tot_attr)
 
 
 a1 = AttrObj(crit_rate=a1_passive_uptime*.20)
-#$F166
 ca_attr = tot_attr + a1
 cr = headshot_rate + (1-headshot_rate)*ca_attr.crit_rate
 #print('cr', cr)
 
-#def calc_dmg(base_atk, atk_pct, flat_atk, ability_mult, dmg_bonus_pct, def_drop_pct=0, char_lvl=80, enemy_lvl=80, enemy_resist_pct=.1):
-#ca_dmg = avg_crit_dmg(calc_dmg(tot_attr.base_atk, tot_attr.atk_pct, tot_attr.flat_atk, 1.792, tot_attr.dmg_bonus[DmgTag.CRYO]), cr, tot_attr.crit_dmg)*4
 ca_dmg = avg_crit_dmg(calc_dmg_obj(ca_attr, 1.792, [DmgTag.CRYO, DmgTag.CHARGED]), cr, ca_attr.crit_dmg)*4
 print(ca_dmg)
 
 a1 = AttrObj(crit_rate=a1_passive_bloom_uptime*.20)
 bloom_attr = tot_attr + a1
-#cr = headshot_rate + (1-headshot_rate)*bloom_attr.crit_rate
-#print(bloom_attr)
-# Bloom cannot crit without angle trick
+# Bloom cannot guaranteed crit without angle trick
 bloom_dmg = avg_crit_dmg(calc_dmg_obj(bloom_attr, 3.0464, [DmgTag.CRYO, DmgTag.CHARGED]), bloom_attr.crit_rate, bloom_attr.crit_dmg)*4
 print(bloom_dmg)
-#bloom_dmg = 119608
 
 skill_dmg = avg_crit_dmg(calc_dmg_obj(tot_attr, 3.326, [DmgTag.CRYO, DmgTag.SKILL]), tot_attr.crit_rate, tot_attr.crit_dmg)*1
 print(skill_dmg)

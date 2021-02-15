@@ -31,6 +31,7 @@ field_time = n4_time*4 + 1.5 + .3 # assuming 1.5 sec for burst cast and .3 for s
 resist_down = 0
 
 low_hp = 0 # 0 when HP > 50% , 1 when HP is  < 50%
+use_bennet = 0 # 0 when excluding bennet atk buff, 1 when including
 
 cw_avg_stacks = 1
 dm_1_opp = .5
@@ -43,17 +44,27 @@ cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={Dmg
 
 artifact_substats = AttrObj(flat_atk=50, atk_pct=.249, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.149, flat_def=59, def_pct=.186)
 artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # cw
+#artifact_set_effects = AttrObj(dmg_bonus={DmgTag.NORMAL: .4}) # bolide 100% shield uptime
 
 char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
 
 #archaic_attr = AttrObj(base_atk=565, atk_pct=.276) # archaic, lvl 90/90, phys procs later
-dm_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08*dm_1_opp) # deathmatch , lvl 90/90
-homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa, lvl 90/90
+wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
+bt_attr = AttrObj(base_atk=354, hp_pct=.469) # black tassel, lvl 90/90, assuming not slimes
+dm_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08*dm_1_opp) # deathmatch R1, lvl 90/90
+homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
+pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
+pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
 
 
+# (weapon attributes, artifacts, is it homa?)
 weapons = {
-    "Deathmatch": (dm_attr, cd_main_stats, False), # (weapon attributes, artifacts, is it homa?)
-    "Homa": (homa_attr, cr_main_stats, True)
+    "White Tassel": (wt_attr, cr_main_stats, False),
+    "Black Tassel": (bt_attr, cr_main_stats, False),
+    "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
+    "Homa": (homa_attr, cr_main_stats, True),
+    "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
+    "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
 }
 
 for weapon_name, weapon in weapons.items():
@@ -70,17 +81,22 @@ for weapon_name, weapon in weapons.items():
     tot_attr.flat_atk += skill_flat_atk
     if is_homa:
         tot_attr.flat_atk += .008*tot_hp + .01*low_hp*tot_hp # only for homa
-
-    print(tot_attr)
     
-    na_ca_dmg = calc_avg_crit_dmg_obj(tot_attr, (.6447 + .6635 + .8394 + .9026), [DmgTag.PYRO], enemy_resist_pct=.1-resist_down)*4 # 4 N4's
+    # Hail's Puretao
+    # Bennet baseatk 80/80 169, 90/90 191, t6: 78.4, t8: 90, t10: 101
+    # Festering 510 90/90 Favonius 454
+    bennet_base_atk = 169 + 510
+    bennet_atk_bonus = bennet_base_atk * .784
+    tot_attr.flat_atk += bennet_atk_bonus * use_bennet
+    
+    na_ca_dmg = calc_avg_crit_dmg_obj(tot_attr, (.6447 + .6635 + .8394 + .9026), [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)*4 # 4 N4's, remember to separate damage tags for normal and charged
 
-    #print(na_ca_dmg)
+    print(na_ca_dmg)
     skill_dmg = calc_avg_crit_dmg_obj(tot_attr, .896, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*2 # 2 blood blossoms
-    #print(skill_dmg)
+    print(skill_dmg)
 
     burst_dmg = calc_avg_crit_dmg_obj(tot_attr, 4.994 if low_hp else 3.9952, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*1
-    #print(burst_dmg)
+    print(burst_dmg)
 
     tot_dmg = na_ca_dmg + skill_dmg + burst_dmg  
 

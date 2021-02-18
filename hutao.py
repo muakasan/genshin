@@ -41,6 +41,7 @@ low_hp = 1 # 0 when HP > 50% , 1 when HP is  < 50%
 use_bennet = 0 # 0 when excluding bennet atk buff, 1 when including
 
 cw_avg_stacks = 1
+dm_1_opp = .5
 liyue_chars = 2.0
 a4_uptime = 1
 base_hp = 13721
@@ -57,8 +58,7 @@ char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag
 #archaic_attr = AttrObj(base_atk=565, atk_pct=.276) # archaic, lvl 90/90, phys procs later
 wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
 bt_attr = AttrObj(base_atk=354, hp_pct=.469) # black tassel, lvl 90/90, assuming not slimes
-dm_solo_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08) # deathmatch R1, lvl 90/90 < 2 enemy
-dm_multi_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16) # deathmatch R1, lvl 90/90 >= 2 enemy
+dm_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08*dm_1_opp) # deathmatch R1, lvl 90/90
 homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
 pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
 pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
@@ -68,8 +68,7 @@ pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgT
 weapons = {
     "White Tassel": (wt_attr, cr_main_stats, False),
     "Black Tassel": (bt_attr, cr_main_stats, False),
-    "Deathmatch (Solo)": (dm_solo_attr, cd_main_stats, False), 
-    "Deathmatch (Multi)": (dm_multi_attr, cd_main_stats, False), 
+    "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
     "Homa": (homa_attr, cr_main_stats, True),
     "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
     "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)

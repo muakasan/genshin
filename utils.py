@@ -76,7 +76,7 @@ def add_dicts(d1, d2):
     return new_dict
 
 class AttrObj:
-    def __init__(self, base_atk=0, atk_pct=0, flat_atk=0, crit_rate=0, crit_dmg=0, er=0, em=0, hp_pct=0, flat_hp=0, def_pct=0, flat_def=0, dmg_bonus=dict()):
+    def __init__(self, base_atk=0, atk_pct=0, flat_atk=0, crit_rate=0, crit_dmg=0, er=0, em=0, hp_pct=0, flat_hp=0, def_pct=0, flat_def=0, dmg_bonus=None):
         self.base_atk = base_atk
         self.atk_pct = atk_pct
         self.flat_atk = flat_atk
@@ -88,7 +88,11 @@ class AttrObj:
         self.flat_hp = flat_hp
         self.def_pct = def_pct
         self.flat_def = flat_def
-        self.dmg_bonus = dmg_bonus
+        if dmg_bonus == None:
+            self.dmg_bonus = dict()
+        else:
+            self.dmg_bonus = dmg_bonus
+
     
     def __add__(self, o):
         base_atk = self.base_atk + o.base_atk

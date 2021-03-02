@@ -1,4 +1,4 @@
-from utils import calc_dmg, calc_dmg_obj, calc_avg_crit_dmg_obj, AttrObj, DmgTag, calc_tot_atk
+from utils import calc_dmg, calc_dmg_obj, calc_avg_crit_dmg_obj, AttrObj, DmgTag, calc_tot_atk, amp_react_mult
 
 # Strongly based on Zakharov's sheets https://docs.google.com/spreadsheets/d/1RAz3jx4x1ThWED8XWg8GKIf73RjPrZrnSukYZUCSRU8/edit#gid=383481181
 
@@ -24,15 +24,17 @@ na_frames = [14, 25, 51, 80, 116, 184]
 for i in range(6):
     print(sum(na_mv[:i+1])/(na_frames[i]+21)*60)
 '''
-# Frames counteed from myself
-skill_cast_time = 16/25 
-burst_cast_time = 55/25 
-# 2.84 seconds total
+NA_MV = [.6447, .6635, .8394, .9026, .9415, 1.1819]
+# Frames counted by Artesians
+skill_cast_time = 42/60 
+burst_cast_time = 130/60 
 
-n4c_time = 58/25
-n4c_casts = 2
-n1c_time = 27/25 
-n1c_casts = 5
+n3c_time = 92/60
+n3c_burst_casts = 3
+n3c_casts = 5
+
+#n1c_time = 27/25 
+#n1c_casts = 5
 # E lasts for 9 seconds
 
 resist_down = 0
@@ -96,32 +98,43 @@ for weapon_name, weapon in weapons.items():
     bennet_atk_bonus = bennet_base_atk * .784
     tot_attr.flat_atk += bennet_atk_bonus * use_bennet
     
+    n1_mv, n2_mv, n3_mv, _, _, _ = NA_MV
     n4_mv = .6447 + .6635 + .8394 + .9026
+    n3_mv = .6447 + .6635 + .8394
     n1_mv = .6647
     charge_mv = 1.8695
 
-    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
+    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
 
-    n4c_dmg = calc_avg_crit_dmg_obj(tot_attr, n4_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)*n4c_casts # 2 N4C's
-    n4c_dmg += charge_dmg*n4c_casts
-    #print(n4c_dmg)
+    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, .6447, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
+    n23_dmg = calc_avg_crit_dmg_obj(tot_attr, .6635 + .8394, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
 
-    n1c_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)*n1c_casts # 5 N1C's
-    n1c_dmg += charge_dmg*n1c_casts
+    n3c_dmg = charge_dmg + n1_dmg + n23_dmg 
+
+#    n1c_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)*n3c_casts
+#    n1c_dmg += charge_dmg*n1c_casts
     #print(n1c_dmg)
 
-    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, .896, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*2 # 2 blood blossoms
+    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, .896, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*2 # 3 blood blossoms
     #print(skill_dmg)
 
-    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, 4.994 if low_hp else 3.9952, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*1
+    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, 4.994 if low_hp else 3.9952, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)
     #print(burst_dmg)
 
-    tot_n4c_dmg = n4c_dmg + skill_dmg + burst_dmg  
-    tot_n1c_dmg = n1c_dmg + skill_dmg + burst_dmg
+    tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
+    tot_n3c_burst_dmg = n3c_dmg*n3c_burst_casts + skill_dmg + burst_dmg
+    #tot_n1c_dmg = n1c_dmg + skill_dmg + burst_dmg
 
-    n4c_dps = tot_n4c_dmg/(burst_cast_time + skill_cast_time + n4c_casts*n4c_time)
-    n1c_dps = tot_n1c_dmg/(burst_cast_time + skill_cast_time + n1c_casts*n1c_time)
+    n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_burst_casts*n3c_time
+    n3c_dur = skill_cast_time + n3c_casts*n3c_time
 
-    print("N4C DPS:", n4c_dps)
-    print("N1C DPS:", n1c_dps)
+    n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
+    n3c_dps = tot_n3c_dmg/n3c_dur
+    #n1c_dps = tot_n1c_dmg/(burst_cast_time + skill_cast_time + n1c_casts*n1c_time)
+
+    print("N3C burst duration", n3c_burst_dur)
+    print("N3C duration", n3c_dur)
+
+    print("N3C Burst DPS:", n3c_burst_dps)
+    print("N3C DPS:", n3c_dps)
     print()

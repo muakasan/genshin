@@ -26,7 +26,7 @@ def resist_mult(enemy_resist_pct):
 def calc_dmg(base_atk, atk_pct, flat_atk, ability_mult, dmg_bonus_pct, def_drop_pct=0, char_lvl=80, enemy_lvl=80, enemy_resist_pct=.1):
     tot_atk = calc_tot_atk(base_atk, atk_pct, flat_atk)
     def_mult = (100 + char_lvl)/((100+char_lvl) + (100 + enemy_lvl)*(1-def_drop_pct))
-    return ability_mult * tot_atk * (1 + dmg_bonus_pct) # * def_mult * resist_mult(enemy_resist_pct)
+    return ability_mult * tot_atk * (1 + dmg_bonus_pct) * def_mult * resist_mult(enemy_resist_pct)
 
 # Non-Critical Dmg*(1 + (Crit Rate%*Crit DMG%))
 def avg_crit_dmg(non_crit_dmg, crit_rate, crit_dmg, supress=False):

@@ -1,11 +1,21 @@
 # Robin's Damage Calculator https://docs.google.com/spreadsheets/d/1pYDZpKgnF-8aRdfKfD_pYRnKKAabgboO1WuxjPmcZO8/edit#gid=687545622
 # Genshin Wiki Page on Damage: https://genshin-impact.fandom.com/wiki/Damage
+# Zakharov's Full DPS Formula: https://cdn.discordapp.com/attachments/780265272291754026/808855418687717406/Damage_Formula.png
 
 # (Base ATK * (1 + ATK%) + FLAT ATK)*(1 + Corresponding Dmg Bonus%)*(Ability Multiplier)*[(100+Character Level)/((100+Character Level) + (100+Enemy Level)*(1-Defence drop%))]*(1 - Corresponding Enemy RES%)
 
 
 def calc_tot_atk(base_atk, atk_pct, flat_atk):
     return base_atk * (1 + atk_pct) + flat_atk
+
+def resist_mult(enemy_resist_pct):
+    if enemy_resist_pct < 0: # (-infty, 0)
+        r_mult = 1 - enemy_resist_pct/2
+    elif enemy_resist_pct < .75: # [0, .75)
+        r_mult = 1 - enemy_resist_pct
+    else: # [.75, infty)
+        r_mult = 1/(4*enemy_resist_pct + 1)
+    return r_mult
 
 # base_atk = weapon base atk + character base atk
 # flat_atk: from feather, substats 
@@ -15,17 +25,8 @@ def calc_tot_atk(base_atk, atk_pct, flat_atk):
 # TODO how to add multiplicative damage like XQ
 def calc_dmg(base_atk, atk_pct, flat_atk, ability_mult, dmg_bonus_pct, def_drop_pct=0, char_lvl=80, enemy_lvl=80, enemy_resist_pct=.1):
     tot_atk = calc_tot_atk(base_atk, atk_pct, flat_atk)
-
     def_mult = (100 + char_lvl)/((100+char_lvl) + (100 + enemy_lvl)*(1-def_drop_pct))
-    
-    if enemy_resist_pct < 0: # (-infty, 0)
-        resist_mult = 1 - enemy_resist_pct/2
-    elif enemy_resist_pct < .75: # [0, .75)
-        resist_mult = 1 - enemy_resist_pct
-    else: # [.75, infty)
-        resist_mult = 1/(4*enemy_resist_pct + 1) 
-    
-    return ability_mult * tot_atk * (1 + dmg_bonus_pct) * def_mult * resist_mult
+    return ability_mult * tot_atk * (1 + dmg_bonus_pct) # * def_mult * resist_mult(enemy_resist_pct)
 
 # Non-Critical Dmg*(1 + (Crit Rate%*Crit DMG%))
 def avg_crit_dmg(non_crit_dmg, crit_rate, crit_dmg, supress=False):
@@ -47,21 +48,23 @@ def calc_dmg_obj(attr, ability_mult, dmg_tags, enemy_resist_pct=.1):
             dmg_bonus += bonus
     return calc_dmg(attr.base_atk, attr.atk_pct, attr.flat_atk, ability_mult, dmg_bonus, enemy_resist_pct=enemy_resist_pct)
 
-'''
-# https://genshin-impact.fandom.com/wiki/Melt
-MAGIC_MELT_NUMBER1 = .189266831
-MAGIC_MELT_NUMBER2 = -.000505
-def melt_base_dmg():
-    return 1 + (MAGIC_MELT_NUMBER1 * em * exp(MAGIC_MELT_NUMBER2))/100
+# Amplifying Reactions (ie Vape/Melt):
+def amp_react_mult(is_strong, em, bonus):
+    mult = 2 if is_strong else 1.5
+    return mult * (1 + 2.78*em/(1400 + em) + bonus)
 
-# sometimes called reverse melt (1.5x melt)
-def cryo_melt_dmg():
-    return 1.5 * melt_base_dmg
-
-# 2x melt
-def pyro_melt():
-    return 2 * melt_base_dmg
-'''
+# Transformative reactions
+def tf_react_dmg(react_type, em, bonus, char_lvl=80, enemy_resist_pct=.1):
+    mult_type_dict = {
+        ReactionType.OL: 4, 
+        ReactionType.SHATTER: 3,
+        ReactionType.EC: 2.4,
+        ReactionType.SWIRL: 1.2,
+        ReactionType.SC: 1,
+    }
+    bonus_mult = 1 + 6.66*em/(1400 + em) + bonus
+    lvl_mult = .0002325*char_lvl**3 + .05547*char_lvl**2 - .2523*char_lvl + 14.74
+    return mult_type_dict[react_type]*bonus_mult*lvl_mult*resist_mult(enemy_resist_pct)
 
 def add_dicts(d1, d2):
     new_dict = d1.copy()
@@ -137,3 +140,17 @@ class DmgTag:
     BURST = "BURST" # elemental burst
     NORMAL = "NORMAL" # normal attacks
     CHARGED = "CHARGED" # charged attacks
+
+class ReactionType:
+    OVERLOAD = "OVERLOAD"
+    OL = "OVERLOAD"
+    SHATTERED = "SHATTERED"
+    SHATTER = "SHATTERED"
+    ELECTROCHARGED = "ELECTROCHARGED"
+    EC = "ELECTROCHARGED"
+    SWIRL = "SWIRL"
+    SUPERCONDUCT = "SUPERCONDUCT"
+    SC = "SUPERCONDUCT"
+    MELT = "MELT"
+    VAPORIZE = "VAPORIZE"
+    VAPE = "VAPORIZE"

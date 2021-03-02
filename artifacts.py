@@ -2,31 +2,31 @@
 
 # Only 5 stars so far
 from enum import Enum, auto
-class SubstatType(Enum):
-    FLAT_HP = auto()
-    FLAT_ATK = auto()
-    FLAT_DEF = auto()
-    HP_PCT = auto()
-    ATK_PCT = auto()
-    DEF_PCT = auto()
-    EM = auto() # Elemental Mastery
-    ER = auto() # Energy Recharge
-    CRIT_RATE = auto()
-    CRIT_DMG = auto()
+class SubstatType:
+    FLAT_HP = "flat_hp"
+    FLAT_ATK = "flat_atk"
+    FLAT_DEF = "flat_def"
+    HP_PCT = "hp_pct"
+    ATK_PCT = "atk_pct"
+    DEF_PCT = "def_pct"
+    EM = "em" # Elemental Mastery
+    ER = "er" # Energy Recharge
+    CRIT_RATE = "crit_rate"
+    CRIT_DMG = "crit_dmg"
 
-class MainstatType(Enum):
-    FLAT_HP = auto()
-    FLAT_ATK = auto()
-    HP_PCT = auto()
-    ATK_PCT = auto()
-    DEF_PCT = auto()
-    EM = auto() # Elemental Mastery
-    ER = auto() # Energy Recharge
-    CRIT_RATE = auto()
-    CRIT_DMG = auto()
-    ELEM = auto() # TODO should add elemntal types later
-    PHYS = auto()
-    HEALING = auto()
+class MainstatType:
+    FLAT_HP = "flat_hp"
+    FLAT_ATK = "flat_atk"
+    HP_PCT = "hp_pct"
+    ATK_PCT = "atk_pct"
+    DEF_PCT = "def_pct"
+    EM = "em" # Elemental Mastery
+    ER = "er" # Energy Recharge
+    CRIT_RATE = "crit_rate"
+    CRIT_DMG = "crit_dmg"
+    ELEM = "elem" # TODO should add elemntal types later
+    PHYS = "phys"
+    HEALING = "heal"
 
 class ArtifactType(Enum):
     FLOWER = auto()

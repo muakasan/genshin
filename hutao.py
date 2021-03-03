@@ -30,8 +30,8 @@ skill_cast_time = 30/60
 burst_cast_time = 99/60 
 
 n3c_time = 110/60
-n3c_burst_casts = 3
-n3c_casts = 4
+n3c_burst_casts = 4
+n3c_casts = 5
 
 resist_down = 0
 

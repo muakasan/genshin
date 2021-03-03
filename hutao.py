@@ -1,7 +1,7 @@
 from utils import calc_dmg, calc_dmg_obj, calc_avg_crit_dmg_obj, AttrObj, DmgTag, calc_tot_atk, amp_react_mult
 
 # Strongly based on Zakharov's sheets https://docs.google.com/spreadsheets/d/1RAz3jx4x1ThWED8XWg8GKIf73RjPrZrnSukYZUCSRU8/edit#gid=383481181
-
+# DM High HP should be 15262, Homa 17311 
 '''
 4pc Crimson Witch		
 HP%, Pyro%, Crit Rate/Crit Damage		
@@ -40,7 +40,7 @@ n3c_casts = 5
 
 resist_down = 0
 
-low_hp = 0 # 0 when HP > 50% , 1 when HP is  < 50%
+low_hp = 1 # 0 when HP > 50% , 1 when HP is  < 50%
 use_bennet = 0 # 0 when excluding bennet atk buff, 1 when including
 
 cw_avg_stacks = 1
@@ -60,8 +60,6 @@ artifact_substats = AttrObj(flat_atk=50, atk_pct=.149, crit_rate=.198, crit_dmg=
 artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # cw
 #artifact_set_effects = AttrObj(dmg_bonus={DmgTag.NORMAL: .4}) # bolide 100% shield uptime
 
-char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
-
 #archaic_attr = AttrObj(base_atk=565, atk_pct=.276) # archaic, lvl 90/90, phys procs later
 wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
 bt_attr = AttrObj(base_atk=354, hp_pct=.469) # black tassel, lvl 90/90, assuming not slimes
@@ -70,7 +68,8 @@ homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
 pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
 pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
 
-def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, low_hp=0, is_homa=False, use_bennet=0):
+def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0):
+    char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
     tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
     tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
     
@@ -93,7 +92,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
 
     vape_mult = 1
     if vape:
-        vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
+        vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=vape_bonus) # vape, bonus from CW
     
     charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*vape_mult
     n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*vape_mult
@@ -115,21 +114,21 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     return n3c_burst_dps
     #n3c_dps = tot_n3c_dmg/n3c_dur
 
+if __name__ == '__main__':
+    # (weapon attributes, artifacts, is it homa?)
+    weapons = {
+        "White Tassel": (wt_attr, cr_main_stats, False),
+        "Black Tassel": (bt_attr, cr_main_stats, False),
+        "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
+        "Homa": (homa_attr, cr_main_stats, True),
+        "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
+        "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
+    }
 
-# (weapon attributes, artifacts, is it homa?)
-weapons = {
-    "White Tassel": (wt_attr, cr_main_stats, False),
-    "Black Tassel": (bt_attr, cr_main_stats, False),
-    "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
-    "Homa": (homa_attr, cr_main_stats, True),
-    "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
-    "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
-}
-
-for weapon_name, weapon in weapons.items():
-    print(weapon_name)
-    weapon_attr, artifact_main_stats, is_homa = weapon
-    n3c_burst_dps = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, low_hp=low_hp, is_homa=is_homa, use_bennet=use_bennet)
-    print("N3C Burst DPS:", n3c_burst_dps)
-    #print("N3C DPS:", n3c_dps)
-    print()
+    for weapon_name, weapon in weapons.items():
+        print(weapon_name)
+        weapon_attr, artifact_main_stats, is_homa = weapon
+        n3c_burst_dps = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, use_bennet=use_bennet)
+        print("N3C Burst DPS:", n3c_burst_dps)
+        #print("N3C DPS:", n3c_dps)
+        print()

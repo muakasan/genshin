@@ -25,13 +25,13 @@ for i in range(6):
     print(sum(na_mv[:i+1])/(na_frames[i]+21)*60)
 '''
 NA_MV = [.6447, .6635, .8394, .9026, .9415, 1.1819]
-# Frames counted by Artesians
-skill_cast_time = 42/60 
-burst_cast_time = 130/60 
+# Frames counted by Artesians and JinJinx
+skill_cast_time = 30/60 
+burst_cast_time = 99/60 
 
-n3c_time = 92/60
+n3c_time = 110/60
 n3c_burst_casts = 3
-n3c_casts = 5
+n3c_casts = 4
 
 #n1c_time = 27/25 
 #n1c_casts = 5

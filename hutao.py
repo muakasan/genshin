@@ -35,7 +35,7 @@ n3c_casts = 5
 
 resist_down = 0
 
-low_hp = 1 # 0 when HP > 50% , 1 when HP is  < 50%
+low_hp = 0 # 0 when HP > 50% , 1 when HP is  < 50%
 use_bennet = 0 # 0 when excluding bennet atk buff, 1 when including
 
 cw_avg_stacks = 1
@@ -111,7 +111,7 @@ for weapon_name, weapon in weapons.items():
 
     skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*1 # 1 blood blossom
 
-    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)
+    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
 
     tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
     tot_n3c_burst_dmg = n3c_dmg*n3c_burst_casts + skill_dmg + burst_dmg

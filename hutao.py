@@ -25,6 +25,11 @@ for i in range(6):
     print(sum(na_mv[:i+1])/(na_frames[i]+21)*60)
 '''
 NA_MV = [.6447, .6635, .8394, .9026, .9415, 1.1819]
+charge_mv = 1.8695
+skill_mv = .896
+low_hp_burst_mv = 4.994
+high_hp_burst_mv = 3.9952
+
 # Frames counted by Artesians and JinJinx
 skill_cast_time = 30/60 
 burst_cast_time = 99/60 
@@ -65,7 +70,7 @@ homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
 pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
 pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
 
-def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, low_hp=0, is_homa=False, use_bennet=0):
+def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, low_hp=0, is_homa=False, use_bennet=0):
     tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
     tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
     
@@ -85,21 +90,20 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     tot_attr.flat_atk += bennet_atk_bonus * use_bennet
     
     n1_mv, n2_mv, n3_mv, _, _, _ = NA_MV
-    charge_mv = 1.8695
-    skill_mv = .896
-    low_hp_burst_mv = 4.994
-    high_hp_burst_mv = 3.9952
 
-    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
-
-    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
+    vape_mult = 1
+    if vape:
+        vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
+    
+    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*vape_mult
+    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*vape_mult
     n23_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv + n3_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
 
     n3c_dmg = charge_dmg + n1_dmg + n23_dmg 
 
     skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*1 # 1 blood blossom
 
-    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
+    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*vape_mult
 
     #tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
     tot_n3c_burst_dmg = n3c_dmg*n3c_burst_casts + skill_dmg + burst_dmg
@@ -125,7 +129,7 @@ weapons = {
 for weapon_name, weapon in weapons.items():
     print(weapon_name)
     weapon_attr, artifact_main_stats, is_homa = weapon
-    n3c_burst_dps = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, low_hp, is_homa, use_bennet)
+    n3c_burst_dps = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, low_hp=low_hp, is_homa=is_homa, use_bennet=use_bennet)
     print("N3C Burst DPS:", n3c_burst_dps)
     #print("N3C DPS:", n3c_dps)
     print()

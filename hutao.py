@@ -33,10 +33,6 @@ n3c_time = 110/60
 n3c_burst_casts = 3
 n3c_casts = 4
 
-#n1c_time = 27/25 
-#n1c_casts = 5
-# E lasts for 9 seconds
-
 resist_down = 0
 
 low_hp = 1 # 0 when HP > 50% , 1 when HP is  < 50%
@@ -47,6 +43,8 @@ dm_1_opp = .5
 liyue_chars = 2.0
 a4_uptime = 1
 base_hp = 13721
+
+hp_to_atk = .0506
 
 cr_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
@@ -84,7 +82,7 @@ for weapon_name, weapon in weapons.items():
     tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
     
     # Adds additional flat attack from e skill and homa passive
-    skill_flat_atk = tot_hp*.0506
+    skill_flat_atk = tot_hp*hp_to_atk
     if skill_flat_atk > 4*tot_attr.base_atk:
         print('Exceeds atk limit')
     tot_attr.flat_atk += skill_flat_atk
@@ -99,38 +97,30 @@ for weapon_name, weapon in weapons.items():
     tot_attr.flat_atk += bennet_atk_bonus * use_bennet
     
     n1_mv, n2_mv, n3_mv, _, _, _ = NA_MV
-    n4_mv = .6447 + .6635 + .8394 + .9026
-    n3_mv = .6447 + .6635 + .8394
-    n1_mv = .6647
     charge_mv = 1.8695
+    skill_mv = .896
+    low_hp_burst_mv = 4.994
+    high_hp_burst_mv = 3.9952
 
     charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
 
-    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, .6447, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
-    n23_dmg = calc_avg_crit_dmg_obj(tot_attr, .6635 + .8394, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
+    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
+    n23_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv + n3_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
 
     n3c_dmg = charge_dmg + n1_dmg + n23_dmg 
 
-#    n1c_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)*n3c_casts
-#    n1c_dmg += charge_dmg*n1c_casts
-    #print(n1c_dmg)
+    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*1 # 1 blood blossom
 
-    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, .896, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*2 # 3 blood blossoms
-    #print(skill_dmg)
-
-    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, 4.994 if low_hp else 3.9952, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)
-    #print(burst_dmg)
+    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)
 
     tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
     tot_n3c_burst_dmg = n3c_dmg*n3c_burst_casts + skill_dmg + burst_dmg
-    #tot_n1c_dmg = n1c_dmg + skill_dmg + burst_dmg
 
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_burst_casts*n3c_time
     n3c_dur = skill_cast_time + n3c_casts*n3c_time
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
     n3c_dps = tot_n3c_dmg/n3c_dur
-    #n1c_dps = tot_n1c_dmg/(burst_cast_time + skill_cast_time + n1c_casts*n1c_time)
 
     print("N3C burst duration", n3c_burst_dur)
     print("N3C duration", n3c_dur)

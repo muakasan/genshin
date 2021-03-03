@@ -48,8 +48,10 @@ hp_to_atk = .0506
 
 cr_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
+em_cr_main_stats = AttrObj(flat_atk=311, em=187, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
+em_cd_main_stats = AttrObj(flat_atk=311, em=187, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 
-artifact_substats = AttrObj(flat_atk=50, atk_pct=.249, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.149, flat_def=59, def_pct=.186)
+artifact_substats = AttrObj(flat_atk=50, atk_pct=.149, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.249, flat_def=59, def_pct=.186)
 artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # cw
 #artifact_set_effects = AttrObj(dmg_bonus={DmgTag.NORMAL: .4}) # bolide 100% shield uptime
 
@@ -63,21 +65,7 @@ homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
 pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
 pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
 
-
-# (weapon attributes, artifacts, is it homa?)
-weapons = {
-    "White Tassel": (wt_attr, cr_main_stats, False),
-    "Black Tassel": (bt_attr, cr_main_stats, False),
-    "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
-    "Homa": (homa_attr, cr_main_stats, True),
-    "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
-    "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
-}
-
-for weapon_name, weapon in weapons.items():
-    print(weapon_name)
-    weapon_attr, artifact_main_stats, is_homa = weapon
-
+def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, low_hp=0, is_homa=False, use_bennet=0):
     tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
     tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
     
@@ -113,18 +101,31 @@ for weapon_name, weapon in weapons.items():
 
     burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*amp_react_mult(is_strong=False, em=tot_attr.em, bonus=.15) # vape, bonus from CW
 
-    tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
+    #tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
     tot_n3c_burst_dmg = n3c_dmg*n3c_burst_casts + skill_dmg + burst_dmg
 
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_burst_casts*n3c_time
-    n3c_dur = skill_cast_time + n3c_casts*n3c_time
+    #n3c_dur = skill_cast_time + n3c_casts*n3c_time
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
-    n3c_dps = tot_n3c_dmg/n3c_dur
+    return n3c_burst_dps
+    #n3c_dps = tot_n3c_dmg/n3c_dur
 
-    print("N3C burst duration", n3c_burst_dur)
-    print("N3C duration", n3c_dur)
 
+# (weapon attributes, artifacts, is it homa?)
+weapons = {
+    "White Tassel": (wt_attr, cr_main_stats, False),
+    "Black Tassel": (bt_attr, cr_main_stats, False),
+    "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
+    "Homa": (homa_attr, cr_main_stats, True),
+    "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
+    "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
+}
+
+for weapon_name, weapon in weapons.items():
+    print(weapon_name)
+    weapon_attr, artifact_main_stats, is_homa = weapon
+    n3c_burst_dps = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, low_hp, is_homa, use_bennet)
     print("N3C Burst DPS:", n3c_burst_dps)
-    print("N3C DPS:", n3c_dps)
+    #print("N3C DPS:", n3c_dps)
     print()

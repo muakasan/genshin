@@ -45,7 +45,9 @@ use_bennet = 0 # 0 when excluding bennet atk buff, 1 when including
 
 cw_avg_stacks = 1
 dm_1_opp = .5
-liyue_chars = 2.0
+liyue_chars = 3.0
+vv_stacks = 4
+dbane_passive_uptime = 1
 a4_uptime = 1
 base_hp = 13721
 
@@ -67,6 +69,10 @@ dm_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08*dm_1_opp) # deat
 homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
 pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
 pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
+vv_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*.04) 
+vv_shield_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*2*.04)
+db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passive_uptime}) 
+db_bonusless_attr = AttrObj(base_atk=454, em=221)
 
 def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0):
     char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
@@ -111,7 +117,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     #n3c_dur = skill_cast_time + n3c_casts*n3c_time
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
-    return n3c_burst_dps
+    return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur
     #n3c_dps = tot_n3c_dmg/n3c_dur
 
 if __name__ == '__main__':
@@ -120,6 +126,11 @@ if __name__ == '__main__':
         "White Tassel": (wt_attr, cr_main_stats, False),
         "Black Tassel": (bt_attr, cr_main_stats, False),
         "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
+        "Deathmatch (EM Sands) (Solo 50% time)": (dm_attr, em_cd_main_stats, False), 
+        "DBane": (db_attr, cr_main_stats, False),
+        "DBane (no bonus)": (db_bonusless_attr, cr_main_stats, False),
+        "Vortex Vanquisher": (vv_attr, cr_main_stats, False), 
+        "Vortex Vanquisher (Shield)": (vv_shield_attr, cr_main_stats, False), 
         "Homa": (homa_attr, cr_main_stats, True),
         "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
         "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
@@ -128,7 +139,7 @@ if __name__ == '__main__':
     for weapon_name, weapon in weapons.items():
         print(weapon_name)
         weapon_attr, artifact_main_stats, is_homa = weapon
-        n3c_burst_dps = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, use_bennet=use_bennet)
+        n3c_burst_dps, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, use_bennet=use_bennet)
         print("N3C Burst DPS:", n3c_burst_dps)
         #print("N3C DPS:", n3c_dps)
         print()

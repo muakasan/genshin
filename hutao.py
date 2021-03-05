@@ -5,8 +5,7 @@ from utils import calc_dmg, calc_dmg_obj, calc_avg_crit_dmg_obj, AttrObj, DmgTag
 '''
 4pc Crimson Witch		
 HP%, Pyro%, Crit Rate/Crit Damage		
-E + N4 x 4 + Q
-(80+21)/60*4 = 6.733
+E + N3C x 5 + Q
 '''
 
 '''
@@ -16,14 +15,6 @@ Enemy Elem Res	10.0%
 Enemy Phys Res	10.0%
 '''
 
-'''
-Determine best NA combo (N4), 21 frames for dash cancel (determined it was n4)
-na_mv = [.6447, .6635, .8394, .9026, .9415, 1.1819]
-
-na_frames = [14, 25, 51, 80, 116, 184]
-for i in range(6):
-    print(sum(na_mv[:i+1])/(na_frames[i]+21)*60)
-'''
 NA_MV = [.6447, .6635, .8394, .9026, .9415, 1.1819]
 charge_mv = 1.8695
 skill_mv = .896
@@ -62,9 +53,7 @@ em_cd_main_stats = AttrObj(flat_atk=311, em=187, crit_dmg=.622, dmg_bonus={DmgTa
 
 artifact_substats = AttrObj(flat_atk=50, atk_pct=.149, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.249, flat_def=59, def_pct=.186)
 artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # cw
-#artifact_set_effects = AttrObj(dmg_bonus={DmgTag.NORMAL: .4}) # bolide 100% shield uptime
 
-#archaic_attr = AttrObj(base_atk=565, atk_pct=.276) # archaic, lvl 90/90, phys procs later
 wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
 bt_attr = AttrObj(base_atk=354, hp_pct=.469) # black tassel, lvl 90/90, assuming not slimes
 dm_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08*dm_1_opp) # deathmatch R1, lvl 90/90
@@ -117,15 +106,12 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
 
     burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*vape_mult
 
-    #tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
     tot_n3c_burst_dmg = n3c_dmg + skill_dmg + burst_dmg
 
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_casts*n3c_time
-    #n3c_dur = skill_cast_time + n3c_casts*n3c_time
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
     return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur
-    #n3c_dps = tot_n3c_dmg/n3c_dur
 
 if __name__ == '__main__':
     # (weapon attributes, artifacts, is it homa?)

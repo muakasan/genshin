@@ -35,8 +35,10 @@ skill_cast_time = 30/60
 burst_cast_time = 99/60 
 
 n3c_time = 110/60
-n3c_burst_casts = 4
 n3c_casts = 5
+n1_vapes = 4 
+n2_vapes = 0
+n3_vapes = 3
 
 resist_down = 0
 
@@ -100,20 +102,25 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     if vape:
         vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=vape_bonus) # vape, bonus from CW
     
-    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*vape_mult
-    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)*vape_mult
-    n23_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv + n3_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
+    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
+    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)
+    n2_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)
+    n3_dmg = calc_avg_crit_dmg_obj(tot_attr, n3_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)
+    
+    n1_dmg = n1_dmg*vape_mult*n1_vapes + n1_dmg*(n3c_casts - n1_vapes)
+    n2_dmg = n2_dmg*vape_mult*n2_vapes + n2_dmg*(n3c_casts - n2_vapes)
+    n3_dmg = n3_dmg*vape_mult*n3_vapes + n3_dmg*(n3c_casts - n3_vapes)
+    charge_dmg = charge_dmg*n3c_casts*vape_mult
+    n3c_dmg = charge_dmg + n1_dmg + n2_dmg + n3_dmg
 
-    n3c_dmg = charge_dmg + n1_dmg + n23_dmg 
-
-    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*1 # 1 blood blossom
+    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*vape_mult*1 # 1 blood blossom that vapes
 
     burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*vape_mult
 
     #tot_n3c_dmg = n3c_dmg*n3c_casts + skill_dmg  
-    tot_n3c_burst_dmg = n3c_dmg*n3c_burst_casts + skill_dmg + burst_dmg
+    tot_n3c_burst_dmg = n3c_dmg + skill_dmg + burst_dmg
 
-    n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_burst_casts*n3c_time
+    n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_casts*n3c_time
     #n3c_dur = skill_cast_time + n3c_casts*n3c_time
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur

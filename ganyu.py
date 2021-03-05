@@ -50,5 +50,6 @@ burst_dmg = avg_crit_dmg(calc_dmg_obj(tot_attr, 11.806, [DmgTag.CRYO, DmgTag.SKI
 print(burst_dmg)
 
 tot_dmg = ca_dmg + bloom_dmg + skill_dmg + burst_dmg
+print(tot_dmg)
 dps = tot_dmg/field_time
 print(dps)

@@ -61,6 +61,7 @@ highest_tot_attr = None
 
 BUDGET = 9*4
 count = 0
+# starts with 4 because of initial rolls, 6 because (0, 4, 8, 12, 16, 20) to get that rolls x number of artifacts (4 or 5)
 for s1 in range(4, 6*4 + 1): # flat_atk, 3 b/c feather
     for s2 in range(4, 6*4 + 1): # atk_pct, 3 b/c sands
         for s3 in range(4, 6*4+1): # crit_rate, 3 b/c circlet

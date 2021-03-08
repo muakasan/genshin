@@ -65,7 +65,7 @@ vv_shield_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*2*.04)
 db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passive_uptime}) 
 db_bonusless_attr = AttrObj(base_atk=454, em=221)
 
-def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0):
+def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0, supress=False, ret_attr=False):
     char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
     tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
     tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
@@ -91,26 +91,32 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     if vape:
         vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=vape_bonus) # vape, bonus from CW
     
-    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down)
-    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)
-    n2_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)
-    n3_dmg = calc_avg_crit_dmg_obj(tot_attr, n3_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down)
+    charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down, supress=supress)
+    n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)
+    n2_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)
+    n3_dmg = calc_avg_crit_dmg_obj(tot_attr, n3_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)
     
     n1_dmg = n1_dmg*vape_mult*n1_vapes + n1_dmg*(n3c_casts - n1_vapes)
     n2_dmg = n2_dmg*vape_mult*n2_vapes + n2_dmg*(n3c_casts - n2_vapes)
     n3_dmg = n3_dmg*vape_mult*n3_vapes + n3_dmg*(n3c_casts - n3_vapes)
     charge_dmg = charge_dmg*n3c_casts*vape_mult
     n3c_dmg = charge_dmg + n1_dmg + n2_dmg + n3_dmg
+    #print("Normal + Charged DMG:", n3c_dmg)
 
-    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down)*vape_mult*1 # 1 blood blossom that vapes
-
-    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down)*vape_mult
+    skill_dmg = calc_avg_crit_dmg_obj(tot_attr, skill_mv, [DmgTag.PYRO, DmgTag.SKILL], enemy_resist_pct=.1-resist_down, supress=supress)*vape_mult*1 # 1 blood blossom that vapes
+    #print("Blood Blossom DMG:", skill_dmg)
+    
+    burst_dmg = calc_avg_crit_dmg_obj(tot_attr, low_hp_burst_mv if low_hp else high_hp_burst_mv, [DmgTag.PYRO, DmgTag.BURST], enemy_resist_pct=.1-resist_down, supress=supress)*vape_mult
+    #print("Burst DMG:", burst_dmg)
 
     tot_n3c_burst_dmg = n3c_dmg + skill_dmg + burst_dmg
 
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_casts*n3c_time
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
+
+    if ret_attr:
+        return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur, tot_attr
     return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur
 
 if __name__ == '__main__':

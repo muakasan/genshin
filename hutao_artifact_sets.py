@@ -28,3 +28,4 @@ for set_name, (set_effects, should_vape, vape_bonus, should_OL) in artifact_sets
     if should_OL:
         dmg += tf_react_dmg(ReactionType.OL, em=99, bonus=.40, char_lvl=80, enemy_resist_pct=.1)*6
     print(set_name, dmg/dur)
+    print()

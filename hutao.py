@@ -20,12 +20,15 @@ charge6_mv = 1.8695
 skill6_mv = .896
 low_hp_burst6_mv = 4.994
 high_hp_burst6_mv = 3.9952
+hp_to_atk6 = .0506
+
 
 na8_mv = [.7406, .7622, .9643, .10368, 1.0816, 1.3578]
 charge8_mv = 2.1476
 skill8_mv = 1.024
 low_hp_burst8_mv = 5.5842
 high_hp_burst8_mv = 4.4674
+hp_to_atk8 = .0566
 
 # Frames counted by Artesians and JinJinx
 skill_cast_time = 30/60 
@@ -47,10 +50,7 @@ dm_1_opp = .5
 liyue_chars = 3.0
 vv_stacks = 4
 dbane_passive_uptime = 1
-a4_uptime = 1
-base_hp = 13721
 
-hp_to_atk = .0506
 
 cr_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
@@ -73,26 +73,17 @@ db_bonusless_attr = AttrObj(base_atk=454, em=221)
 
 def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=None, talent=6, vape=True, vape_bonus=0, low_hp=0, is_homa=False, supress=False):
     if not char_attr: 
-        char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
-    tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
-    tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
-    
-    # Adds additional flat attack from e skill and homa passive
-    skill_flat_atk = tot_hp*hp_to_atk
-    if skill_flat_atk > 4*tot_attr.base_atk:
-        print('Exceeds atk limit')
-        skill_flat_atk = 4*tot_attr.base_atk
-    tot_attr.flat_atk += skill_flat_atk
-    if is_homa:
-        tot_attr.flat_atk += .008*tot_hp + .01*low_hp*tot_hp # only for homa
-    
+        char_attr = AttrObj(base_atk=94, base_hp=13721, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
+
     if talent == 6:
+        hp_to_atk = hp_to_atk6
         n1_mv, n2_mv, n3_mv, _, _, _ = na6_mv
         charge_mv = charge6_mv
         skill_mv = skill6_mv
         low_hp_burst_mv = low_hp_burst6_mv
         high_hp_burst_mv = high_hp_burst6_mv
     elif talent == 8:
+        hp_to_atk = hp_to_atk8
         n1_mv, n2_mv, n3_mv, _, _, _ = na8_mv
         charge_mv = charge8_mv
         skill_mv = skill8_mv
@@ -100,7 +91,20 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
         high_hp_burst_mv = high_hp_burst8_mv
     else:
         raise RuntimeError("Talent not supported")    
- 
+    
+    tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
+    tot_hp = calc_tot_atk(tot_attr.base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
+
+    # Adds additional flat attack from e skill and homa passive
+    skill_flat_atk = tot_hp*hp_to_atk
+    if skill_flat_atk > 4*tot_attr.base_atk:
+        if not supress:
+            print('Exceeds atk limit')
+        skill_flat_atk = 4*tot_attr.base_atk
+    tot_attr.flat_atk += skill_flat_atk
+    if is_homa:
+        tot_attr.flat_atk += .008*tot_hp + .01*low_hp*tot_hp # only for homa
+
     vape_mult = 1
     if vape:
         vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=vape_bonus) # vape, bonus from CW

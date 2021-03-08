@@ -73,7 +73,7 @@ def zi_art_optim(dps_func, sandss, goblets, circlets, substats):
 
 # 4 line start, only 4 substats, doesn't account for single "dead" roll on sands and circlet
 def perf_art_optim(dps_func, sandss, goblets, circlets, substats):
-    GOOD_ROLLS = 4 # 4, 8, 16, 20
+    GOOD_ROLLS = 5 # 4, 8, 12, 16, 20
     BUDGET = 4*5 + GOOD_ROLLS*5 - 2 # initial + good rolls, you lose 2 to dead rolls, can't have crit in circlet and sub, can't have atk% in circlet and sub, TODO hack
 
     highest_dps = 0
@@ -113,10 +113,10 @@ def perf_art_optim(dps_func, sandss, goblets, circlets, substats):
                     highest_mainstat_attr = mainstat_attr
                     highest_tot_attr = tot_attr
                     highest_dps = dps
-    print("DPS:", highest_dps)
-    print("Substats:", highest_substat_dist)
-    print("Artifact Stats:", highest_substat_attr + highest_mainstat_attr)
-    print("Total Stats:", highest_tot_attr)
+    print("DPS:\n", highest_dps)
+    print("Substats:\n", highest_substat_dist)
+    print("Artifact Stats:\n", highest_substat_attr + highest_mainstat_attr)
+    print("Total Stats:\n", highest_tot_attr)
 
 def main():
     # def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0):

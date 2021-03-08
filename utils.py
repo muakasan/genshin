@@ -76,8 +76,10 @@ def add_dicts(d1, d2):
     return new_dict
 
 class AttrObj:
-    def __init__(self, base_atk=0, atk_pct=0, flat_atk=0, crit_rate=0, crit_dmg=0, er=0, em=0, hp_pct=0, flat_hp=0, def_pct=0, flat_def=0, dmg_bonus=None):
+    def __init__(self, base_atk=0, base_hp=0, base_def=0, atk_pct=0, flat_atk=0, crit_rate=0, crit_dmg=0, er=0, em=0, hp_pct=0, flat_hp=0, def_pct=0, flat_def=0, dmg_bonus=None):
         self.base_atk = base_atk
+        self.base_hp = base_hp
+        self.base_def = base_def
         self.atk_pct = atk_pct
         self.flat_atk = flat_atk
         self.crit_rate = crit_rate
@@ -96,6 +98,9 @@ class AttrObj:
     
     def __add__(self, o):
         base_atk = self.base_atk + o.base_atk
+        base_hp = self.base_hp + o.base_hp
+        base_def = self.base_def + o.base_def
+
         atk_pct = self.atk_pct + o.atk_pct
         flat_atk = self.flat_atk + o.flat_atk
         crit_rate = self.crit_rate + o.crit_rate
@@ -107,11 +112,13 @@ class AttrObj:
         def_pct = self.def_pct + o.def_pct
         flat_def = self.flat_def + o.flat_def
         dmg_bonus = add_dicts(self.dmg_bonus, o.dmg_bonus)
-        return AttrObj(base_atk=base_atk, atk_pct=atk_pct, flat_atk=flat_atk, crit_rate=crit_rate, crit_dmg=crit_dmg, er=er, em=em, hp_pct=hp_pct, flat_hp=flat_hp, def_pct=def_pct, flat_def=flat_def, dmg_bonus=dmg_bonus) 
+        return AttrObj(base_atk=base_atk, base_hp=base_hp, base_def=base_def, atk_pct=atk_pct, flat_atk=flat_atk, crit_rate=crit_rate, crit_dmg=crit_dmg, er=er, em=em, hp_pct=hp_pct, flat_hp=flat_hp, def_pct=def_pct, flat_def=flat_def, dmg_bonus=dmg_bonus) 
     
     def __str__(self):
         ret = ''
         ret += f'Base ATK: {self.base_atk}\n'
+        ret += f'Base HP: {self.base_hp}\n'
+        ret += f'Base DEF: {self.base_def}\n'
         ret += f'ATK%: {self.atk_pct}\n'
         ret += f'Flat ATK: {self.flat_atk}\n'
         ret += f'CR: {self.crit_rate}\n'

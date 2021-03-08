@@ -15,11 +15,17 @@ Enemy Elem Res	10.0%
 Enemy Phys Res	10.0%
 '''
 
-NA_MV = [.6447, .6635, .8394, .9026, .9415, 1.1819]
-charge_mv = 1.8695
-skill_mv = .896
-low_hp_burst_mv = 4.994
-high_hp_burst_mv = 3.9952
+na6_mv = [.6447, .6635, .8394, .9026, .9415, 1.1819]
+charge6_mv = 1.8695
+skill6_mv = .896
+low_hp_burst6_mv = 4.994
+high_hp_burst6_mv = 3.9952
+
+na8_mv = [.7406, .7622, .9643, .10368, 1.0816, 1.3578]
+charge8_mv = 2.1476
+skill8_mv = 1.024
+low_hp_burst8_mv = 5.5842
+high_hp_burst8_mv = 4.4674
 
 # Frames counted by Artesians and JinJinx
 skill_cast_time = 30/60 
@@ -65,8 +71,9 @@ vv_shield_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*2*.04)
 db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passive_uptime}) 
 db_bonusless_attr = AttrObj(base_atk=454, em=221)
 
-def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0, supress=False, ret_attr=False):
-    char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
+def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=None, talent=6, vape=True, vape_bonus=0, low_hp=0, is_homa=False, supress=False):
+    if not char_attr: 
+        char_attr = AttrObj(base_atk=94, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
     tot_attr = char_attr + weapon_attr + artifact_main_stats + artifact_substats + artifact_set_effects
     tot_hp = calc_tot_atk(base_hp, tot_attr.hp_pct, tot_attr.flat_hp)
     
@@ -74,19 +81,26 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     skill_flat_atk = tot_hp*hp_to_atk
     if skill_flat_atk > 4*tot_attr.base_atk:
         print('Exceeds atk limit')
+        skill_flat_atk = 4*tot_attr.base_atk
     tot_attr.flat_atk += skill_flat_atk
     if is_homa:
         tot_attr.flat_atk += .008*tot_hp + .01*low_hp*tot_hp # only for homa
     
-    # Hail's Puretao
-    # Bennet baseatk 80/80 169, 90/90 191, t6: 78.4, t8: 90, t10: 101
-    # Festering 510 90/90 Favonius 454
-    bennet_base_atk = 169 + 510
-    bennet_atk_bonus = bennet_base_atk * .784
-    tot_attr.flat_atk += bennet_atk_bonus * use_bennet
-    
-    n1_mv, n2_mv, n3_mv, _, _, _ = NA_MV
-
+    if talent == 6:
+        n1_mv, n2_mv, n3_mv, _, _, _ = na6_mv
+        charge_mv = charge6_mv
+        skill_mv = skill6_mv
+        low_hp_burst_mv = low_hp_burst6_mv
+        high_hp_burst_mv = high_hp_burst6_mv
+    elif talent == 8:
+        n1_mv, n2_mv, n3_mv, _, _, _ = na8_mv
+        charge_mv = charge8_mv
+        skill_mv = skill8_mv
+        low_hp_burst_mv = low_hp_burst8_mv
+        high_hp_burst_mv = high_hp_burst8_mv
+    else:
+        raise RuntimeError("Talent not supported")    
+ 
     vape_mult = 1
     if vape:
         vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=vape_bonus) # vape, bonus from CW
@@ -115,9 +129,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
 
-    if ret_attr:
-        return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur, tot_attr
-    return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur
+    return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur, tot_attr
 
 if __name__ == '__main__':
     # (weapon attributes, artifacts, is it homa?)
@@ -138,7 +150,7 @@ if __name__ == '__main__':
     for weapon_name, weapon in weapons.items():
         print(weapon_name)
         weapon_attr, artifact_main_stats, is_homa = weapon
-        n3c_burst_dps, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, use_bennet=use_bennet)
+        n3c_burst_dps, _, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa)
         print("N3C Burst DPS:", n3c_burst_dps)
         #print("N3C DPS:", n3c_dps)
         print()

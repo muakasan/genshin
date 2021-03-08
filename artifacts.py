@@ -1,4 +1,5 @@
 #https://genshin-impact.fandom.com/wiki/Artifacts
+from utils import AttrObj
 
 # Only 5 stars so far
 from enum import Enum, auto
@@ -90,3 +91,7 @@ def valid_mainstats(artifact_type):
         return [MainstatType.HP_PCT, MainstatType.DEF_PCT, MainstatType.ATK_PCT, MainstatType.EM, MainstatType.CRIT_RATE, MainstatType.CRIT_DMG, MainstatType.HEALING]
 
 #def default_substats():
+
+# 3 flat atk, 5 atk%, 6 cr, 6 cd, 5 em, 5 er, 3 hp%, 3 flat def, 3 flat , 3 def%
+zakharov_artifact_substats = AttrObj(flat_atk=50, atk_pct=.249, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.149, flat_def=59, def_pct=.186)
+zak_hutao_artifact_substats = AttrObj(flat_atk=50, atk_pct=.149, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.249, flat_def=59, def_pct=.186)

@@ -24,7 +24,7 @@ artifact_sets = {
 
 
 for set_name, (set_effects, should_vape, vape_bonus, should_OL) in artifact_sets.items():
-    _, dmg, dur = n3cq_dps(dm_attr, cd_main_stats, artifact_substats, set_effects, vape=should_vape, low_hp=1, vape_bonus=vape_bonus)
+    _, dmg, dur, _ = n3cq_dps(dm_attr, cd_main_stats, artifact_substats, set_effects, vape=should_vape, low_hp=1, vape_bonus=vape_bonus)
     if should_OL:
         dmg += tf_react_dmg(ReactionType.OL, em=99, bonus=.40, char_lvl=80, enemy_resist_pct=.1)*6
     print(set_name, dmg/dur)

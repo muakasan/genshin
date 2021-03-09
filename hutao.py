@@ -134,7 +134,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_casts*n3c_time
 
     if is_sspine:
-        tot_n3c_burst_dmg += calc_avg_crit_dmg_obj(tot_attr, .40, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)*sspine_passive_procs # Skyward spine vacuum blade
+        tot_n3c_burst_dmg += calc_avg_crit_dmg_obj(tot_attr, .40, [DmgTag.PHYS], enemy_resist_pct=.1-resist_down, supress=supress)*sspine_passive_procs # Skyward spine vacuum blade
         n3c_burst_dur -= ( (n3c_time - n3c_sspine_time)*n3c_casts )
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur

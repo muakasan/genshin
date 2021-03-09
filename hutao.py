@@ -34,7 +34,8 @@ hp_to_atk8 = .0566
 skill_cast_time = 30/60 
 burst_cast_time = 99/60 
 
-n3c_time = 110/60
+n3c_sspine_time = 102/60
+n3c_time = 108/60
 n3c_casts = 5
 n1_vapes = 4 
 n2_vapes = 0
@@ -50,6 +51,7 @@ dm_1_opp = .5
 liyue_chars = 3.0
 vv_stacks = 4
 dbane_passive_uptime = 1
+sspine_passive_procs = 4
 
 
 cr_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
@@ -71,7 +73,7 @@ vv_shield_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*2*.04)
 db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passive_uptime}) 
 db_bonusless_attr = AttrObj(base_atk=454, em=221)
 
-def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=None, talent=6, vape=True, vape_bonus=0, low_hp=0, is_homa=False, supress=False):
+def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=None, talent=6, vape=True, vape_bonus=0, low_hp=0, is_homa=False, is_sspine=False, supress=False):
     if not char_attr: 
         char_attr = AttrObj(base_atk=94, base_hp=13721, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
 
@@ -108,7 +110,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     vape_mult = 1
     if vape:
         vape_mult = amp_react_mult(is_strong=False, em=tot_attr.em, bonus=vape_bonus) # vape, bonus from CW
-    
+
     charge_dmg = calc_avg_crit_dmg_obj(tot_attr, charge_mv, [DmgTag.PYRO, DmgTag.CHARGED], enemy_resist_pct=.1-resist_down, supress=supress)
     n1_dmg = calc_avg_crit_dmg_obj(tot_attr, n1_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)
     n2_dmg = calc_avg_crit_dmg_obj(tot_attr, n2_mv, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)
@@ -130,6 +132,10 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     tot_n3c_burst_dmg = n3c_dmg + skill_dmg + burst_dmg
 
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_casts*n3c_time
+
+    if is_sspine:
+        tot_n3c_burst_dmg += calc_avg_crit_dmg_obj(tot_attr, .40, [DmgTag.PYRO, DmgTag.NORMAL], enemy_resist_pct=.1-resist_down, supress=supress)*sspine_passive_procs # Skyward spine vacuum blade
+        n3c_burst_dur -= ( (n3c_time - n3c_sspine_time)*n3c_casts )
 
     n3c_burst_dps = tot_n3c_burst_dmg/n3c_burst_dur
 

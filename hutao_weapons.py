@@ -1,5 +1,5 @@
 from utils import calc_dmg, calc_dmg_obj, calc_avg_crit_dmg_obj, AttrObj, DmgTag, calc_tot_atk, amp_react_mult
-from hutao import n3cq_dps
+from hutao import n3cq_dps, n3c_casts
 from artifact_optimizer import perf_art_optim
 from artifacts import MainstatType, SubstatType
 
@@ -56,7 +56,7 @@ cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={Dmg
 em_cr_main_stats = AttrObj(flat_atk=311, em=187, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 em_cd_main_stats = AttrObj(flat_atk=311, em=187, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 
-artifact_substats = AttrObj(flat_atk=50, atk_pct=.149, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.249, flat_def=59, def_pct=.186)
+artifact_substats = AttrObj()
 artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # cw
 
 wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
@@ -73,37 +73,42 @@ db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passiv
 db_bonusless_attr = AttrObj(base_atk=454, em=221)
 lithic2_attr = AttrObj(base_atk=565, atk_pct=.276 + 2*.07, crit_rate=.03*2)
 lithic4_attr = AttrObj(base_atk=565, atk_pct=.276 + 4*.07, crit_rate=.03*4)
-
+bc0 = AttrObj(base_atk=510, crit_dmg=.551)
+bc3 = AttrObj(base_atk=510, atk_pct=.12*3, crit_dmg=.551)
+sspine = AttrObj(base_atk=674, er=.368, crit_rate=.08)
 if __name__ == '__main__':
     # (weapon attributes, artifacts, is it homa?)
     weapons = {
-        "White Tassel": (wt_attr, cr_main_stats, False),
-        "Black Tassel": (bt_attr, cr_main_stats, False),
-        "Deathmatch (2 Enemies)": (dm_2enem_attr, cd_main_stats, False), 
-        "Deathmatch (Solo)": (dm_solo_attr, cd_main_stats, False), 
-        "DBane": (db_attr, cr_main_stats, False),
-        "DBane (no bonus)": (db_bonusless_attr, cr_main_stats, False),
-        "Vortex Vanquisher (5 stacks, No Shield)": (vv_attr, cr_main_stats, False), 
-        "Vortex Vanquisher (5 stacks, Shield)": (vv_shield_attr, cr_main_stats, False), 
-        "Homa": (homa_attr, cr_main_stats, True),
-        "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
-        "Jade Winged Spear (6 stacks)": (pjws6_attr, cr_main_stats, False),
-        "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False),
-        "Lithic Spear (2 Liyue)": (lithic2_attr, cr_main_stats, False),
-        "Lithic Spear (4 Liyue)": (lithic4_attr, cr_main_stats, False),
+        "White Tassel": (wt_attr, cr_main_stats, False, False),
+        "Black Tassel": (bt_attr, cr_main_stats, False, False),
+        "Deathmatch (2 Enemies)": (dm_2enem_attr, cd_main_stats, False, False), 
+        "Deathmatch (Solo)": (dm_solo_attr, cd_main_stats, False, False), 
+        "DBane": (db_attr, cr_main_stats, False, False),
+        "DBane (no bonus)": (db_bonusless_attr, cr_main_stats, False, False),
+        "Vortex Vanquisher (5 stacks, No Shield)": (vv_attr, cr_main_stats, False, False), 
+        "Vortex Vanquisher (5 stacks, Shield)": (vv_shield_attr, cr_main_stats, False, False), 
+        "Homa": (homa_attr, cr_main_stats, True, False),
+        "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False, False),
+        "Jade Winged Spear (6 stacks)": (pjws6_attr, cr_main_stats, False, False),
+        "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False, False),
+        "Lithic Spear (2 Liyue)": (lithic2_attr, cr_main_stats, False, False),
+        "Lithic Spear (4 Liyue)": (lithic4_attr, cr_main_stats, False, False),
+        "Blackcliff (0 stacks)": (lithic2_attr, cr_main_stats, False, False),
+        "Blackcliff (3 stacks)": (lithic4_attr, cr_main_stats, False, False),
+        "Skyward Spine": (sspine, cr_main_stats, False, True),
     }
     low_hp = 1
     char_attr = AttrObj(base_atk=99, base_hp=14459, crit_rate=.05, crit_dmg=.884, dmg_bonus={DmgTag.PYRO: low_hp*.33})
     for weapon_name, weapon in weapons.items():
         print(weapon_name, "(Mainstats Only)")
-        weapon_attr, artifact_main_stats, is_homa = weapon
-        n3c_burst_dps, _, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=char_attr, talent=8, vape=True, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa)
+        weapon_attr, artifact_main_stats, is_homa, is_sspine = weapon
+        n3c_burst_dps, _, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=char_attr, talent=8, vape=True, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, is_sspine=is_sspine)
         print("N3C Burst DPS:", n3c_burst_dps)
         #print("N3C DPS:", n3c_dps)
         print(weapon_name, "(Perf. Subs)")
 
-        weapon_attr, artifact_main_stats, is_homa = weapon
-        dps_func = lambda art_mains, art_subs: n3cq_dps(weapon_attr, art_mains, art_subs, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, supress=True)
+        weapon_attr, artifact_main_stats, is_homa, is_sspine = weapon
+        dps_func = lambda art_mains, art_subs: n3cq_dps(weapon_attr, art_mains, art_subs, artifact_set_effects, char_attr=char_attr, talent=8, vape=True, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, is_sspine=is_sspine, supress=True)
         perf_art_optim(dps_func, sandss=[MainstatType.HP_PCT], goblets=["PYRO"], circlets=[MainstatType.CRIT_DMG, MainstatType.CRIT_RATE], 
             substats=[SubstatType.CRIT_RATE, SubstatType.CRIT_DMG, SubstatType.EM, SubstatType.HP_PCT])
         #        n3c_burst_dps, _, _, _ = 

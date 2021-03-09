@@ -70,20 +70,24 @@ pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=7*.032, dmg_bonus={Dm
 vv_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*.04) 
 vv_shield_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*2*.04)
 db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passive_uptime}) 
+db5_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .36*dbane_passive_uptime}) 
 db_bonusless_attr = AttrObj(base_atk=454, em=221)
 lithic2_attr = AttrObj(base_atk=565, atk_pct=.276 + 2*.07, crit_rate=.03*2)
 lithic4_attr = AttrObj(base_atk=565, atk_pct=.276 + 4*.07, crit_rate=.03*4)
+lithic2_5_attr = AttrObj(base_atk=565, atk_pct=.276 + 2*.11, crit_rate=.07*2)
+lithic4_5_attr = AttrObj(base_atk=565, atk_pct=.276 + 4*.11, crit_rate=.07*4)
 bc0 = AttrObj(base_atk=510, crit_dmg=.551)
 bc3 = AttrObj(base_atk=510, atk_pct=.12*3, crit_dmg=.551)
 sspine = AttrObj(base_atk=674, er=.368, crit_rate=.08)
 if __name__ == '__main__':
     # (weapon attributes, artifacts, is it homa?)
     weapons = {
-        "White Tassel": (wt_attr, cr_main_stats, False, False),
+        "White Tassel (R5)": (wt_attr, cr_main_stats, False, False),
         "Black Tassel": (bt_attr, cr_main_stats, False, False),
         "Deathmatch (2 Enemies)": (dm_2enem_attr, cd_main_stats, False, False), 
         "Deathmatch (Solo)": (dm_solo_attr, cd_main_stats, False, False), 
         "DBane": (db_attr, cr_main_stats, False, False),
+        "DBane R5": (db5_attr, cr_main_stats, False, False),
         "DBane (no bonus)": (db_bonusless_attr, cr_main_stats, False, False),
         "Vortex Vanquisher (5 stacks, No Shield)": (vv_attr, cr_main_stats, False, False), 
         "Vortex Vanquisher (5 stacks, Shield)": (vv_shield_attr, cr_main_stats, False, False), 
@@ -92,6 +96,8 @@ if __name__ == '__main__':
         "Jade Winged Spear (6 stacks)": (pjws6_attr, cr_main_stats, False, False),
         "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False, False),
         "Lithic Spear (2 Liyue)": (lithic2_attr, cr_main_stats, False, False),
+        "Lithic Spear (4 Liyue)": (lithic4_5_attr, cr_main_stats, False, False),
+        "Lithic Spear (2 Liyue)": (lithic2_5_attr, cr_main_stats, False, False),
         "Lithic Spear (4 Liyue)": (lithic4_attr, cr_main_stats, False, False),
         "Blackcliff (0 stacks)": (lithic2_attr, cr_main_stats, False, False),
         "Blackcliff (3 stacks)": (lithic4_attr, cr_main_stats, False, False),

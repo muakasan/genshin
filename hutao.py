@@ -30,6 +30,8 @@ low_hp_burst8_mv = 5.5842
 high_hp_burst8_mv = 4.4674
 hp_to_atk8 = .0566
 
+# https://docs.google.com/spreadsheets/d/1tXwNi_TPojdocCIci3v6nhd87kNwsmFpOjxJS3NKMKs/edit#gid=1353671486
+# https://docs.google.com/spreadsheets/d/1PN0WgqENUfV8i5hnrz1BOEU56fk7m8FYlFXzFzrsS3k/edit#gid=565215807
 # Frames counted by Artesians and JinJinx
 skill_cast_time = 30/60 
 burst_cast_time = 99/60 

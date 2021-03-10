@@ -23,7 +23,7 @@ high_hp_burst6_mv = 3.9952
 hp_to_atk6 = .0506
 
 
-na8_mv = [.7406, .7622, .9643, .10368, 1.0816, 1.3578]
+na8_mv = [.7406, .7622, .9643, 1.0368, 1.0816, 1.3578]
 charge8_mv = 2.1476
 skill8_mv = 1.024
 low_hp_burst8_mv = 5.5842
@@ -46,15 +46,10 @@ n3_vapes = 3
 resist_down = 0
 
 low_hp = 1 # 0 when HP > 50% , 1 when HP is  < 50%
-use_bennet = 0 # 0 when excluding bennet atk buff, 1 when including
 
 cw_avg_stacks = 1
 dm_1_opp = .5
-liyue_chars = 3.0
-vv_stacks = 4
-dbane_passive_uptime = 1
 sspine_passive_procs = 4
-
 
 cr_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
@@ -64,20 +59,11 @@ em_cd_main_stats = AttrObj(flat_atk=311, em=187, crit_dmg=.622, dmg_bonus={DmgTa
 artifact_substats = AttrObj(flat_atk=50, atk_pct=.149, crit_rate=.198, crit_dmg=.396, em=99, er=.275, flat_hp=762, hp_pct=.249, flat_def=59, def_pct=.186)
 artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # cw
 
-wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
-bt_attr = AttrObj(base_atk=354, hp_pct=.469) # black tassel, lvl 90/90, assuming not slimes
 dm_attr = AttrObj(base_atk=454, crit_rate=.368, atk_pct=.16+.08*dm_1_opp) # deathmatch R1, lvl 90/90
-homa_attr = AttrObj(base_atk=608, hp_pct=.2, crit_dmg=.662) # Homa R1, lvl 90/90
-pjws0_attr = AttrObj(base_atk=674, crit_rate=.221) # Jade Winged Spear R1, 0 stacks, lvl 90/90
-pjws7_attr = AttrObj(base_atk=674, crit_rate=.221, atk_pct=.224, dmg_bonus={DmgTag.PYRO: .12}) # Jade Winged Spear R1, 7 stacks, lvl 90/90, remember to change from PYRO if not all abilies/attacks are pyro
-vv_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*.04) 
-vv_shield_attr = AttrObj(base_atk=608, atk_pct=.496 + vv_stacks*2*.04)
-db_attr = AttrObj(base_atk=454, em=221, dmg_bonus={DmgTag.PYRO: .20*dbane_passive_uptime}) 
-db_bonusless_attr = AttrObj(base_atk=454, em=221)
 
 def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=None, talent=6, vape=True, vape_bonus=0, low_hp=0, is_homa=False, is_sspine=False, supress=False):
     if not char_attr: 
-        char_attr = AttrObj(base_atk=94, base_hp=13721, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4
+        char_attr = AttrObj(base_atk=94, base_hp=13721, crit_rate=.05, crit_dmg=.788, dmg_bonus={DmgTag.PYRO: low_hp*.33}) #crit dmg ascension stat, a4, 80/80
 
     if talent == 6:
         hp_to_atk = hp_to_atk6
@@ -106,8 +92,9 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
             print('Exceeds atk limit')
         skill_flat_atk = 4*tot_attr.base_atk
     tot_attr.flat_atk += skill_flat_atk
-    if is_homa:
-        tot_attr.flat_atk += .008*tot_hp + .01*low_hp*tot_hp # only for homa
+
+    if is_homa: # R1 Homa HP attack bonus
+        tot_attr.flat_atk += (.008 + .01*low_hp)*tot_hp 
 
     vape_mult = 1
     if vape:
@@ -135,7 +122,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
 
     n3c_burst_dur = burst_cast_time + skill_cast_time + n3c_casts*n3c_time
 
-    if is_sspine:
+    if is_sspine: # Skyward spine R1
         tot_n3c_burst_dmg += calc_avg_crit_dmg_obj(tot_attr, .40, [DmgTag.PHYS], enemy_resist_pct=.1-resist_down, supress=supress)*sspine_passive_procs # Skyward spine vacuum blade
         n3c_burst_dur -= ( (n3c_time - n3c_sspine_time)*n3c_casts )
 
@@ -144,25 +131,7 @@ def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_e
     return n3c_burst_dps, tot_n3c_burst_dmg, n3c_burst_dur, tot_attr
 
 if __name__ == '__main__':
-    # (weapon attributes, artifacts, is it homa?)
-    weapons = {
-        "White Tassel": (wt_attr, cr_main_stats, False),
-        "Black Tassel": (bt_attr, cr_main_stats, False),
-        "Deathmatch (Solo 50% time)": (dm_attr, cd_main_stats, False), 
-        "Deathmatch (EM Sands) (Solo 50% time)": (dm_attr, em_cd_main_stats, False), 
-        "DBane": (db_attr, cr_main_stats, False),
-        "DBane (no bonus)": (db_bonusless_attr, cr_main_stats, False),
-        "Vortex Vanquisher": (vv_attr, cr_main_stats, False), 
-        "Vortex Vanquisher (Shield)": (vv_shield_attr, cr_main_stats, False), 
-        "Homa": (homa_attr, cr_main_stats, True),
-        "Jade Winged Spear (0 stacks)": (pjws0_attr, cr_main_stats, False),
-        "Jade Winged Spear (7 stacks)": (pjws7_attr, cr_main_stats, False)
-    }
-
-    for weapon_name, weapon in weapons.items():
-        print(weapon_name)
-        weapon_attr, artifact_main_stats, is_homa = weapon
-        n3c_burst_dps, _, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa)
-        print("N3C Burst DPS:", n3c_burst_dps)
-        #print("N3C DPS:", n3c_dps)
-        print()
+    n3c_burst_dps, _, _, _ = n3cq_dps(dm_attr, cr_main_stats, artifact_substats, artifact_set_effects, vape_bonus=.15, low_hp=0, is_homa=False)
+    print("Deathmatch N3C Burst DPS:", n3c_burst_dps)
+    #print("N3C DPS:", n3c_dps)
+    print()

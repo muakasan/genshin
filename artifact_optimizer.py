@@ -113,10 +113,11 @@ def perf_art_optim(dps_func, sandss, goblets, circlets, substats):
                     highest_mainstat_attr = mainstat_attr
                     highest_tot_attr = tot_attr
                     highest_dps = dps
-    print("DPS:\n", highest_dps)
-    print("Substats:\n", highest_substat_dist)
-    print("Artifact Stats:\n", highest_substat_attr + highest_mainstat_attr)
-    print("Total Stats:\n", highest_tot_attr)
+    #print("DPS:\n", highest_dps)
+    #print("Substats:\n", highest_substat_dist)
+    #print("Artifact Stats:\n", highest_substat_attr + highest_mainstat_attr)
+    #print("Total Stats:\n", highest_tot_attr)
+    return highest_dps, highest_mainstat_attr, highest_substat_attr, highest_substat_dist, highest_tot_attr
 
 def main():
     # def n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, vape=True, vape_bonus=0, low_hp=0, is_homa=False, use_bennet=0):

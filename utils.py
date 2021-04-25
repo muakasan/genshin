@@ -44,7 +44,7 @@ def calc_avg_crit_dmg_obj(attr, ability_mult, dmg_tags, enemy_resist_pct=.1, sup
 def calc_dmg_obj(attr, ability_mult, dmg_tags, char_lvl=80, enemy_lvl=80, enemy_resist_pct=.1):
     dmg_bonus = 0
     for tag, bonus in attr.dmg_bonus.items():
-        if tag in dmg_tags:
+        if tag in dmg_tags or tag == DmgTag.ALL:
             dmg_bonus += bonus
     return calc_dmg(attr.base_atk, attr.atk_pct, attr.flat_atk, ability_mult, dmg_bonus, char_lvl=char_lvl, enemy_lvl=enemy_lvl, enemy_resist_pct=enemy_resist_pct)
 
@@ -151,6 +151,7 @@ class DmgTag:
     BURST = "BURST" # elemental burst
     NORMAL = "NORMAL" # normal attacks
     CHARGED = "CHARGED" # charged attacks
+    ALL = "ALL"
 
 class ReactionType:
     OVERLOAD = "OVERLOAD"

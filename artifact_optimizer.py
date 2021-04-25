@@ -72,9 +72,9 @@ def zi_art_optim(dps_func, sandss, goblets, circlets, substats):
 
 
 # 4 line start, only 4 substats, doesn't account for single "dead" roll on sands and circlet
-def perf_art_optim(dps_func, sandss, goblets, circlets, substats):
+def perf_art_optim(dps_func, sandss, goblets, circlets, substats, budget=4*5+5*5-2, starting_roll=-1):
     GOOD_ROLLS = 5 # 4, 8, 12, 16, 20
-    BUDGET = 4*5 + GOOD_ROLLS*5 - 2 # initial + good rolls, you lose 2 to dead rolls, can't have crit in circlet and sub, can't have atk% in circlet and sub, TODO hack
+    #BUDGET = 4*5 + GOOD_ROLLS*5 - 2 # initial + good rolls, you lose 2 to dead rolls, can't have crit in circlet and sub, can't have atk% in circlet and sub, TODO hack
 
     highest_dps = 0
     highest_substat_attr = None
@@ -88,7 +88,7 @@ def perf_art_optim(dps_func, sandss, goblets, circlets, substats):
         avg_subs = {sub: avg_artifact_substat(sub) for sub in substats} # Gets the average substat roll value for each substat
         num_valid_arts = {sub: count_valid_artifacts(sub, sands, goblet, circlet) for sub in substats} # Checks for duplicate substats from main stats
         # starts with 1 for each artifact if possible
-        roll_counts = [range(num_valid_arts[sub], num_valid_arts[sub] + GOOD_ROLLS*num_valid_arts[sub] + 1) for sub in substats] # Generates number of rolls for each substat
+        roll_counts = [range(num_valid_arts[sub] if starting_roll == -1 else starting_roll, num_valid_arts[sub] + GOOD_ROLLS*num_valid_arts[sub] + 1) for sub in substats] # Generates number of rolls for each substat
         # mainstat_dist = {ms: artifact_mainstat(ms, star=5, lvl=20) for ms in [sandss, goblet, circlet]} # TODO does not account for multiple of the same main stat
         # hack to get around pyro type for now
         mainstat_attr = {ms: artifact_mainstat(ms, star=5, lvl=20) for ms in [sands, circlet]} # TODO does not account for multiple of the same main stat
@@ -102,7 +102,7 @@ def perf_art_optim(dps_func, sandss, goblets, circlets, substats):
                 pass
                 #print(count)
             count += 1
-            if sum(substat_dist) == BUDGET:
+            if sum(substat_dist) == budget:
                 substat_dist = {substats[i]: substat_dist[i] for i in range(len(substats))}
                 substat_attr_d = {sub: avg_subs[sub]*rc for sub, rc in substat_dist.items()} # Looks like {"ATK_PCT": 5, "EM": 2, "CRIT_RATE": 10, "CRIT_DMG": 10}
                 substat_attr = AttrObj(**substat_attr_d)

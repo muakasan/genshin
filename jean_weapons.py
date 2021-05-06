@@ -1,10 +1,10 @@
 from utils import calc_dmg, calc_dmg_obj, calc_avg_crit_dmg_obj, AttrObj, DmgTag, calc_tot_atk, amp_react_mult
-from hutao import n3cq_dps, n3c_casts
+from jean import n1c_dps, eeeeq_dps
 from artifact_optimizer import perf_art_optim
 from artifacts import MainstatType, SubstatType
 
 # Strongly based on Zakharov's sheets https://docs.google.com/spreadsheets/d/1RAz3jx4x1ThWED8XWg8GKIf73RjPrZrnSukYZUCSRU8/edit#gid=383481181
-# 90/90
+# 90/90 weapon
 hod_uptime = 1
 rancour_stacks = 4
 alley_uptime = 1
@@ -34,10 +34,11 @@ pjc_attr = AttrObj(base_atk=542, crit_rate=.441, hp_pct=.2) # TODO handle passiv
 
 cr_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
 cd_main_stats = AttrObj(flat_atk=311, hp_pct=.466, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
-em_cr_main_stats = AttrObj(flat_atk=311, em=187, crit_rate=.311, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
-em_cd_main_stats = AttrObj(flat_atk=311, em=187, crit_dmg=.622, dmg_bonus={DmgTag.PYRO: .466}, flat_hp=4780)
-artifact_substats = AttrObj()
-artifact_set_effects = AttrObj(dmg_bonus={DmgTag.PYRO: .15 + .15*.5*cw_avg_stacks}) # Crimson Witch (Vape bonus manually added later)
+
+artifact_no_substats = AttrObj()
+
+bsc2glad2_set_effects = AttrObj(dmg_bonus={DmgTag.PHYS: .25}, atk_pct=.18)
+vv_set_effects = AttrObj(dmg_bonus={DmgTag.ANEMO: .15}) # Doesn't account for resist down
 
 wt_attr = AttrObj(base_atk=401, crit_rate=.221, dmg_bonus={DmgTag.NORMAL: .48}) # white tassel R5, lvl 90/90
 bt_attr = AttrObj(base_atk=354, hp_pct=.469) # black tassel, lvl 90/90, assuming not slimes
@@ -67,7 +68,6 @@ if __name__ == '__main__':
         "Skyward Spine": (sspine, cr_main_stats, False, True),
     }
     low_hp = 1 # 0 when HP > 50% , 1 when HP is  < 50%
-    char_attr = AttrObj(base_atk=99, base_hp=14459, crit_rate=.05, crit_dmg=.884, dmg_bonus={DmgTag.PYRO: low_hp*.33})
     for weapon_name, weapon in weapons.items():
         weapon_attr, artifact_main_stats, is_homa, is_sspine = weapon
         n3c_burst_dps, _, _, _ = n3cq_dps(weapon_attr, artifact_main_stats, artifact_substats, artifact_set_effects, char_attr=char_attr, talent=8, vape=True, vape_bonus=.15, low_hp=low_hp, is_homa=is_homa, is_sspine=is_sspine)
